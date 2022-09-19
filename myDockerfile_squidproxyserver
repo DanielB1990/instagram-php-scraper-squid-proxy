@@ -1,0 +1,20 @@
+FROM alpine:latest
+
+RUN apk update
+RUN apk add squid curl ca-certificates libressl sudo tzdata
+RUN rm -rf /var/cache/apk/*
+
+RUN cp /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+RUN echo "Europe/Amsterdam" > /etc/timezone
+
+RUN echo -e "Defaults:squid !requiretty" > /etc/sudoers.d/squid
+RUN echo -e "squid ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/squid
+
+RUN echo "nameserver 1.1.1.1" > /etc/resolv.conf
+RUN echo "nameserver 1.0.0.1" >> /etc/resolv.conf
+
+COPY start-squid.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/start-squid.sh
+
+USER squid
+ENTRYPOINT ["/usr/local/bin/start-squid.sh"]
